@@ -1,0 +1,212 @@
+/* 可爱粗野主义设计系统 - Cute Brutalism */
+
+:root {
+  /* 糖果色调色板 */
+  --bg-primary: #FFF8E7;      /* 奶油白背景 */
+  --bg-card: #FFE5EC;         /* 粉色卡片 */
+  --accent-yellow: #FFE135;   /* 柠檬黄 */
+  --accent-pink: #FF6B9D;     /* 樱花粉 */
+  --accent-blue: #7ED4FF;     /* 天空蓝 */
+  --accent-green: #98E4B9;    /* 薄荷绿 */
+  --accent-purple: #C8A2FF;   /* 薰衣草紫 */
+  --text-dark: #1A1A1A;       /* 纯黑文字 */
+  --text-light: #FFFFFF;      /* 白色文字 */
+
+  /* 粗野主义特征 */
+  --border-thick: 4px solid #1A1A1A;
+  --shadow-brutal: 6px 6px 0 #1A1A1A;
+  --shadow-brutal-sm: 4px 4px 0 #1A1A1A;
+  --shadow-brutal-hover: 8px 8px 0 #1A1A1A;
+  --radius-cute: 20px;
+  --radius-pill: 50px;
+
+  /* 字体 */
+  --font-title: 'ZCOOL KuaiLe', 'Comic Sans MS', cursive;
+  --font-body: 'Noto Sans SC', -apple-system, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-dark);
+  min-height: 100vh;
+}
+
+/* 通用卡片样式 */
+.card {
+  background: var(--bg-card);
+  border: var(--border-thick);
+  border-radius: var(--radius-cute);
+  box-shadow: var(--shadow-brutal);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-brutal-hover);
+}
+
+/* 按钮样式 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-dark);
+  background: var(--accent-yellow);
+  border: var(--border-thick);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-brutal-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-brutal);
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #1A1A1A;
+}
+
+.btn-pink {
+  background: var(--accent-pink);
+  color: var(--text-light);
+}
+
+.btn-blue {
+  background: var(--accent-blue);
+}
+
+.btn-green {
+  background: var(--accent-green);
+}
+
+/* 输入框样式 */
+.input {
+  width: 100%;
+  padding: 16px 20px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text-dark);
+  background: var(--text-light);
+  border: var(--border-thick);
+  border-radius: var(--radius-cute);
+  box-shadow: var(--shadow-brutal-sm);
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.input:focus {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-brutal);
+}
+
+.input::placeholder {
+  color: #999;
+}
+
+/* 标签胶囊样式 */
+.tag {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  background: var(--accent-blue);
+  border: 3px solid var(--text-dark);
+  border-radius: var(--radius-pill);
+  box-shadow: 3px 3px 0 var(--text-dark);
+}
+
+.tag-pink { background: var(--accent-pink); color: var(--text-light); }
+.tag-yellow { background: var(--accent-yellow); }
+.tag-green { background: var(--accent-green); }
+.tag-purple { background: var(--accent-purple); }
+
+/* 稀有度标签 */
+.rarity {
+  padding: 4px 12px;
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: 3px solid var(--text-dark);
+  border-radius: var(--radius-pill);
+}
+
+.rarity-r { background: #B8B8B8; }
+.rarity-sr { background: var(--accent-purple); color: var(--text-light); }
+.rarity-ssr { 
+  background: linear-gradient(135deg, #FFD700, #FF6B9D, #7ED4FF);
+  animation: rainbow 2s ease infinite;
+}
+
+@keyframes rainbow {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(30deg); }
+}
+
+/* 弹跳动画 */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.bounce {
+  animation: bounce 0.6s ease;
+}
+
+/* 摇摆动画 */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+.wiggle {
+  animation: wiggle 0.5s ease;
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* 加载动画 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 4px solid var(--accent-pink);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* 容器 */
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px;
+}
