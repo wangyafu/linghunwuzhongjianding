@@ -5,7 +5,7 @@ from typing import List
 import os
 
 from services.llm import diagnose_symptom
-from services.image_gen import generate_species_image
+from services.image_gen import generate_species_image_from_prompt
 from services.qiniu_storage import save_to_qiniu
 
 app = FastAPI(
@@ -72,9 +72,11 @@ async def diagnose(request: DiagnoseRequest):
             print(f"New species detected: {result.get('object_name')}, generating image...")
             try:
                 # Seedream 生成
-                temp_url = await generate_species_image(
-                    object_name=result.get("object_name", "未知物种")
-                )
+                object_name = result.get("object_name", "未知物种")
+                prompt = f"""极简涂鸦风格。画风潦草，甚至有点丑。{object_name}，
+粗线条手绘，简约卡通表情，背景颜色必须是纯白的。
+适合社交媒体分享的正方形构图"""
+                temp_url = await generate_species_image_from_prompt(prompt)
                 
                 # 七牛云抓取存储
                 # 构造存储 key: species/{object_name}_{timestamp}.png

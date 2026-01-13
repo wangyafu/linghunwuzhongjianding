@@ -2,19 +2,13 @@
   <div class="home">
     <!-- 标题区 -->
     <header class="header">
-      <h1 class="title">🧬 灵魂物种鉴定所</h1>
+      <img src="../assets/logo.png" alt="Logo" class="logo" />
+      <h1 class="title">灵魂物种鉴定中心</h1>
       <p class="subtitle">Institute of Spiritual Speciation</p>
     </header>
 
     <!-- 标本框 -->
-    <div class="specimen-frame card">
-      <div class="specimen-container">
-        <div class="specimen" :class="{ bounce: isAnimating }">
-          {{ currentEmoji }}
-        </div>
-      </div>
-      <p class="specimen-hint">你的灵魂物种正在扫描中...</p>
-    </div>
+   
 
     <!-- 输入区 -->
     <div class="input-section">
@@ -40,8 +34,33 @@
       <span v-else class="loading"></span>
     </button>
 
-    <!-- 提示 -->
-    <p class="disclaimer">仅供娱乐，如有雷同纯属巧合 ✨</p>
+    <!-- 底部信息区 -->
+    <div class="footer-info">
+      <p class="disclaimer">仅供娱乐，如有雷同纯属巧合 ✨</p>
+      <div class="footer-links">
+        <button class="footer-link" @click="openContact">📮 联系作者</button>
+        <button class="footer-link" @click="toggleDonateModal">🥤 请我喝奶茶</button>
+      </div>
+    </div>
+
+    <!-- 打赏弹窗 -->
+    <div v-if="showDonateModal" class="modal-overlay" @click.self="toggleDonateModal">
+      <div class="donate-modal">
+        <button class="modal-close" @click="toggleDonateModal">✕</button>
+        <h3 class="modal-title">感谢您的支持</h3>
+        <p class="modal-subtitle">如果觉得有趣，可以请作者喝杯奶茶~</p>
+        <div class="qr-codes">
+          <div class="qr-item">
+            <img src="../assets/微信收款码.png" alt="微信收款码" class="qr-image" />
+            <span class="qr-label">微信</span>
+          </div>
+          <div class="qr-item">
+            <img src="../assets/支付宝收款码.jpg" alt="支付宝收款码" class="qr-image" />
+            <span class="qr-label">支付宝</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -135,6 +154,18 @@ const handleDiagnose = async () => {
     isLoading.value = false
   }
 }
+const CONTACT_URL = 'https://www.xiaohongshu.com/user/profile/635f85b8000000001901fe43'
+const showDonateModal = ref(false)
+
+const openContact = () => {
+  window.open(CONTACT_URL, '_blank')
+}
+
+const toggleDonateModal = () => {
+  showDonateModal.value = !showDonateModal.value
+}
+
+// Previous code ends here...
 </script>
 
 <style scoped>
@@ -149,6 +180,23 @@ const handleDiagnose = async () => {
 
 .header {
   text-align: center;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .title {
@@ -261,5 +309,144 @@ const handleDiagnose = async () => {
   font-size: 0.75rem;
   color: #999;
   text-align: center;
+}
+
+/* 底部功能区 */
+.footer-info {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer-link {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.footer-link:hover {
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+  background: white;
+  transform: translateY(-2px);
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+}
+
+.donate-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  color: #999;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: #eee;
+  color: #666;
+}
+
+.modal-title {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.modal-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.qr-codes {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.qr-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.qr-image {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+.qr-label {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* 响应式调整 */
+@media (max-width: 480px) {
+  .qr-image {
+    width: 120px;
+    height: 120px;
+  }
 }
 </style>
