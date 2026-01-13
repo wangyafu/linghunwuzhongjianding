@@ -48,8 +48,39 @@ class DiagnoseResponse(BaseModel):
     sequence_no: int
 
 
-# 简单的计数器（生产环境应使用数据库）
-diagnosis_counter = 0
+# 计数器持久化文件路径
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+COUNTER_FILE = os.path.join(DATA_DIR, "diagnosis_counter.txt")
+
+def get_next_sequence_no() -> int:
+    """
+    获取下一个诊断序号（带持久化）
+    """
+    current_count = 0
+    
+    # 1. 尝试读取现有计数
+    if os.path.exists(COUNTER_FILE):
+        try:
+            with open(COUNTER_FILE, "r") as f:
+                content = f.read().strip()
+                if content:
+                    current_count = int(content)
+        except Exception as e:
+            logger.error(f"读取计数器文件失败: {e}")
+            
+    # 2. 增加计数
+    next_count = current_count + 1
+    
+    # 3. 保存新计数
+    try:
+        if not os.path.exists(DATA_DIR):
+            os.makedirs(DATA_DIR)
+        with open(COUNTER_FILE, "w") as f:
+            f.write(str(next_count))
+    except Exception as e:
+        logger.error(f"保存计数器文件失败: {e}")
+        
+    return next_count
 
 
 @app.get("/")
@@ -84,8 +115,6 @@ async def diagnose(request: DiagnoseRequest):
     """
     诊断用户的情绪状态，返回对应的"物种"信息
     """
-    global diagnosis_counter
-    
     logger.info(f"收到诊断请求: symptom='{request.symptom}'")
     
     if len(request.symptom) < 5 or len(request.symptom) > 50:
@@ -98,9 +127,9 @@ async def diagnose(request: DiagnoseRequest):
         result = await diagnose_symptom(request.symptom)
         logger.info(f"LLM 诊断结果: {result}")
         
-        # 更新计数器
-        diagnosis_counter += 1
-        logger.info(f"诊断计数器: {diagnosis_counter}")
+        # 获取序号（持久化）
+        sequence_no = get_next_sequence_no()
+        logger.info(f"诊断计数器: {sequence_no}")
         
         image_url = result.get("image_url")
         
@@ -148,9 +177,9 @@ async def diagnose(request: DiagnoseRequest):
             keywords=result.get("keywords", ["神秘", "未知", "待鉴定"]),
             diagnosis=result.get("diagnosis", "你的灵魂物种正在鉴定中..."),
             image_url=image_url,
-            sequence_no=diagnosis_counter
+            sequence_no=sequence_no
         )
-        logger.info(f"诊断成功，返回结果: sequence_no={diagnosis_counter}")
+        logger.info(f"诊断成功，返回结果: sequence_no={sequence_no}")
         return response
         
     except Exception as e:

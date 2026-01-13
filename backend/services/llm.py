@@ -87,7 +87,7 @@ async def diagnose_symptom(symptom: str) -> dict:
             {"role": "system", "content": get_system_prompt()},
             {"role": "user", "content": f"请鉴定这个人的灵魂物种：{symptom}\n\n请严格按照 JSON 格式输出，不要添加任何其他文字。"}
         ],
-        temperature=0.9,
+        temperature=1.0,
     )
     
     logger.info("LLM 调用成功，开始解析响应")
