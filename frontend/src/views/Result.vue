@@ -98,13 +98,28 @@ const cardRef = ref<HTMLElement | null>(null)
 const diagnosis = ref<DiagnosisResult | null>(null)
 const currentEmoji = ref('❓')
 
-// 辅助函数：确保 URL 有协议前缀
+// 辅助函数：处理图片 URL
 const ensureProtocol = (url: string) => {
   if (!url) return ''
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+
+  // 1. 如果是 HTTPS，直接返回
+  if (url.startsWith('https://')) {
     return url
   }
-  return 'http://' + url
+
+  // 2. 补全协议（如果是无协议的链接，默认为 http）
+  let fullUrl = url
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    fullUrl = 'http://' + url
+  }
+
+  // 3. 针对七牛云测试域名（HTTP Only），使用 wsrv.nl 进行 HTTPS 代理
+  // 只有这样才能在 HTTPS 网站（如 Pages）上显示 HTTP 图片
+  if (fullUrl.startsWith('http://')) {
+    return `https://wsrv.nl/?url=${encodeURIComponent(fullUrl)}`
+  }
+
+  return fullUrl
 }
 
 onMounted(() => {

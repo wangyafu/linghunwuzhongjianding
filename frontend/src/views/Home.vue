@@ -95,13 +95,27 @@ const speciesIndex = ref(0)  // 改为 ref 以保持响应性
 let speciesInterval: number | null = null
 const isTransitioning = ref(false)
 
-// 辅助函数：确保 URL 有协议前缀
+// 辅助函数：处理图片 URL
 const ensureProtocol = (url: string) => {
   if (!url) return ''
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+
+  // 1. 如果是 HTTPS，直接返回
+  if (url.startsWith('https://')) {
     return url
   }
-  return 'http://' + url
+
+  // 2. 补全协议
+  let fullUrl = url
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    fullUrl = 'http://' + url
+  }
+
+  // 3. 针对 HTTP 图片，使用 wsrv.nl 代理转为 HTTPS
+  if (fullUrl.startsWith('http://')) {
+    return `https://wsrv.nl/?url=${encodeURIComponent(fullUrl)}`
+  }
+
+  return fullUrl
 }
 
 // 当前展示的物种
