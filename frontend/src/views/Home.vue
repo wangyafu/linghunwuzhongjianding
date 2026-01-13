@@ -2,13 +2,23 @@
   <div class="home">
     <!-- 标题区 -->
     <header class="header">
-      <img src="../assets/logo.png" alt="Logo" class="logo" />
       <h1 class="title">灵魂物种鉴定中心</h1>
       <p class="subtitle">Institute of Spiritual Speciation</p>
     </header>
 
-    <!-- 标本框 -->
-   
+    <!-- 馆藏物种展示 -->
+    <div class="species-showcase" v-if="presetSpecies.length > 0 && currentSpecies">
+      <div class="species-image-container">
+        <img 
+          :src="currentSpecies?.image_url" 
+          :alt="currentSpecies?.object_name"
+          class="species-image"
+          :class="{ 'fade-in': !isTransitioning }"
+        />
+      </div>
+  
+      
+    </div>
 
     <!-- 输入区 -->
     <div class="input-section">
@@ -65,20 +75,58 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { API_ENDPOINTS } from '@/config/api'
 
 const router = useRouter()
 
 const symptom = ref('')
 const isLoading = ref(false)
-const isAnimating = ref(false)
-const currentEmoji = ref('🫠')
 
-// 物种 emoji 轮播
-const emojis = ['🫠', '🐟', '🚧', '🌿', '🐭', '🚨', '🛋️', '🕸️', '🥛', '🚪']
-let emojiIndex = 0
-let emojiInterval: number | null = null
+// 预置物种数据
+interface SpeciesItem {
+  object_name: string
+  image_url: string
+}
+
+const presetSpecies = ref<SpeciesItem[]>([])
+const speciesIndex = ref(0)  // 改为 ref 以保持响应性
+let speciesInterval: number | null = null
+const isTransitioning = ref(false)
+
+// 辅助函数：确保 URL 有协议前缀
+const ensureProtocol = (url: string) => {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  return 'http://' + url
+}
+
+// 当前展示的物种
+const currentSpecies = computed(() => {
+  if (presetSpecies.value.length === 0) {
+    return { object_name: '加载中...', image_url: '' }
+  }
+  const species = presetSpecies.value[speciesIndex.value]
+  return {
+    object_name: species?.object_name ?? '',
+    image_url: ensureProtocol(species?.image_url ?? '')
+  }
+})
+
+// 加载预置物种列表
+const fetchPresetSpecies = async () => {
+  try {
+    const response = await fetch(API_ENDPOINTS.presetSpecies)
+    if (response.ok) {
+      presetSpecies.value = await response.json()
+    }
+  } catch (error) {
+    console.error('Failed to fetch preset species:', error)
+  }
+}
 
 // 预设的"发疯文案"
 const presetSymptoms = [
@@ -94,27 +142,31 @@ const presetSymptoms = [
   '表面风平浪静，内心已经崩溃'
 ]
 
-onMounted(() => {
-  // 启动 emoji 轮播
-  emojiInterval = window.setInterval(() => {
-    isAnimating.value = true
-    setTimeout(() => {
-      emojiIndex = (emojiIndex + 1) % emojis.length
-      currentEmoji.value = emojis[emojiIndex]
-      isAnimating.value = false
-    }, 300)
-  }, 2000)
+onMounted(async () => {
+  // 加载预置物种
+  await fetchPresetSpecies()
+  
+  // 启动物种图片轮播
+  speciesInterval = window.setInterval(() => {
+    if (presetSpecies.value.length > 0) {
+      isTransitioning.value = true
+      setTimeout(() => {
+        speciesIndex.value = (speciesIndex.value + 1) % presetSpecies.value.length
+        isTransitioning.value = false
+      }, 300)
+    }
+  }, 3000)
 })
 
 onUnmounted(() => {
-  if (emojiInterval) {
-    clearInterval(emojiInterval)
+  if (speciesInterval) {
+    clearInterval(speciesInterval)
   }
 })
 
 const randomSymptom = () => {
   const randomIndex = Math.floor(Math.random() * presetSymptoms.length)
-  symptom.value = presetSymptoms[randomIndex]
+  symptom.value = presetSymptoms[randomIndex] ?? ''
 }
 
 const handleDiagnose = async () => {
@@ -126,7 +178,7 @@ const handleDiagnose = async () => {
   isLoading.value = true
   
   try {
-    const response = await fetch('http://localhost:8000/api/diagnose', {
+    const response = await fetch(API_ENDPOINTS.diagnose, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -154,7 +206,7 @@ const handleDiagnose = async () => {
     isLoading.value = false
   }
 }
-const CONTACT_URL = 'https://www.xiaohongshu.com/user/profile/635f85b8000000001901fe43'
+const CONTACT_URL = 'https://www.xiaohongshu.com/user/profile/635f85b9002000001901fe43'
 const showDonateModal = ref(false)
 
 const openContact = () => {
@@ -182,21 +234,47 @@ const toggleDonateModal = () => {
   text-align: center;
 }
 
-.logo {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  margin-bottom: 16px;
-  animation: float 3s ease-in-out infinite;
+/* 物种展示区 */
+.species-showcase {
+  width: 100%;
+  max-width: 280px;
+  padding: 24px;
+  text-align: center;
+
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+.species-image-container {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.species-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  mix-blend-mode: multiply;  /* 让白色背景融入页面背景 */
+}
+
+.species-image.fade-in {
+  opacity: 1;
+}
+
+.species-name {
+  font-family: var(--font-title);
+  font-size: 1.2rem;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.species-hint {
+  font-size: 0.8rem;
+  color: #888;
 }
 
 .title {

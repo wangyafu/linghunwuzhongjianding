@@ -12,9 +12,27 @@ from services.image_gen import generate_species_image_from_prompt
 from services.qiniu_storage import save_to_qiniu
 STYLE_SUFFIX="极简涂鸦风格。画风潦草，甚至有点丑。背景颜色必须是纯白的。"
 # 待生成物种列表：(物种名称, 图片描述后缀)
-SPECIES_LIST = [
-   
-    ("主打嘴硬的鸭子", "一只线条极其简单、画得歪歪扭扭的鸭子，全身只有几根毛，但嘴巴画得特别大且厚实，像两块砖头叠在一起，眼神充满倔强" + STYLE_SUFFIX),
+SPECIES_LIST =  [
+    (
+        "马戏团遗落的红鼻子", 
+        "一个经典的红色海绵小丑鼻子，孤独地躺在聚光灯下的阴影里，表面有明显的磨损起球，透着一股滑稽后的凄凉感。"+STYLE_SUFFIX
+    ),
+    (
+        "正在喷火的煤气罐", 
+        "一个锈迹斑斑的老式液化气罐，阀门处正猛烈喷射出红蓝相间的愤怒火焰，罐体因高温微微发红膨胀，濒临爆炸边缘。"+STYLE_SUFFIX
+    ),
+    (
+        "死活解不开的耳机线", 
+        "一团纠缠得像乱麻一样的白色有线耳机，打了无数个复杂的死结，耳机头无奈地垂在两边，呈现出一种令人窒息的混乱美学。"+STYLE_SUFFIX
+    ),
+    (
+        "一触即缩的含羞草", 
+        "一株叶片紧紧闭合、蜷缩成一团的含羞草，种在一个贴着'Do Not Disturb'标签的陶土花盆里，仿佛正在进行光合作用般的自闭。"+STYLE_SUFFIX
+    ),
+    (
+        "不可名状的混沌", 
+        "一团无法被物理法则定义的灰黑色漩涡迷雾，仿佛是深渊的黑洞，隐约吞噬着周围的光线与色彩，充满神秘、虚无与未知的压迫感。"+STYLE_SUFFIX
+    )
 ]
 PRESET_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "preset_species.json")
 

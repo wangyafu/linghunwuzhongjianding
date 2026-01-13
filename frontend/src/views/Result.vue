@@ -7,7 +7,7 @@
         <div class="image-wrapper">
           <img 
             v-if="diagnosis.image_url" 
-            :src="diagnosis.image_url" 
+            :src="ensureProtocol(diagnosis.image_url)" 
             :alt="diagnosis.object_name"
             class="real-image"
             @error="handleImageError"
@@ -18,12 +18,12 @@
         </div>
       </div>
 
-      <!-- 物种名称 + 稀有度 -->
+      <!-- 物种名称 + 物种分类 -->
       <div class="species-identity">
-        <h1 class="species-name">{{ diagnosis.object_name }}</h1>
-        <span class="rarity" :class="getRarityClass(diagnosis.rarity)">
-          {{ diagnosis.rarity }}
-        </span>
+        <h1 class="species-name">{{ diagnosis.display_name }}</h1>
+        <!-- <span class="species-type">
+          {{ diagnosis.object_name }}
+        </span> -->
       </div>
 
       <!-- 关键词标签 -->
@@ -77,9 +77,9 @@ import html2canvas from 'html2canvas'
 
 interface DiagnosisResult {
   object_name: string
+  display_name: string  // 个性化展示名，如 "过劳肥的陈年咸鱼"
   keywords: string[]
   diagnosis: string
-  rarity: string
   image_url: string
   sequence_no: number
 }
@@ -91,6 +91,15 @@ const diagnosis = ref<DiagnosisResult | null>(null)
 const currentEmoji = ref('❓')
 
 const tagClasses = ['tag-pink', 'tag-yellow', 'tag-green']
+
+// 辅助函数：确保 URL 有协议前缀
+const ensureProtocol = (url: string) => {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  return 'http://' + url
+}
 
 onMounted(() => {
   // 从 URL 参数解析诊断结果
@@ -111,14 +120,6 @@ const handleImageError = (e: Event) => {
   // 图片加载失败时显示 emoji
   (e.target as HTMLImageElement).style.display = 'none';
   currentEmoji.value = '🫠';
-}
-
-const getRarityClass = (rarity: string) => {
-  switch (rarity.toUpperCase()) {
-    case 'SSR': return 'rarity-ssr'
-    case 'SR': return 'rarity-sr'
-    default: return 'rarity-r'
-  }
 }
 
 const getTagClass = (index: number) => {
@@ -172,12 +173,12 @@ const diagnoseAgain = () => {
 }
 
 .image-wrapper {
-  width: 100%;
-  height: 200px;
-  border: var(--border-thick);
-  border-radius: 16px;
-  overflow: hidden;
-  background: var(--bg-primary);
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .real-image {
@@ -212,6 +213,16 @@ const diagnoseAgain = () => {
   font-family: var(--font-title);
   font-size: 1.3rem;
   flex: 1;
+}
+
+.species-type {
+  font-size: 0.75rem;
+  color: #666;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  white-space: nowrap;
 }
 
 .keywords {

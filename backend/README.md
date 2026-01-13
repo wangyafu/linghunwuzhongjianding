@@ -41,7 +41,7 @@ cp .env.example .env
 python main.py
 ```
 
-服务将启动在 `http://localhost:8000`。
+服务将启动在 `http://localhost:9002`。
 
 ## 📁 目录结构
 

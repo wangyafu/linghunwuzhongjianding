@@ -4,13 +4,28 @@ import json
 from typing import List, Dict, Optional
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
+import logging
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+# 获取环境变量
+base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+api_key = os.getenv("OPENAI_API_KEY", "")
+
+# 日志输出配置信息用于调试
+logger.info(f"OpenAI Base URL: {base_url}")
+logger.info(f"API Key 已{'设置' if api_key else '未设置'}")
+
+
+
 # 可配置的 OpenAI 兼容接口
 client = AsyncOpenAI(
-    base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
-    api_key=os.getenv("OPENAI_API_KEY", ""),
+    base_url=base_url,
+    api_key=api_key
 )
 
 MODEL_NAME = os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini")
@@ -62,19 +77,36 @@ async def diagnose_symptom(symptom: str) -> dict:
         symptom: 用户输入的情绪/状态描述
     
     Returns:
-        包含 object_name, visual_tag, keywords, diagnosis, rarity 以及可选的 image_url (如果是预置物种)
+        包含 object_name, display_name, keywords, diagnosis 以及可选的 image_url (如果是预置物种)
     """
+    logger.info(f"开始调用 LLM，模型: {MODEL_NAME}")
+    
     response = await client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
             {"role": "system", "content": get_system_prompt()},
-            {"role": "user", "content": f"请鉴定这个人的灵魂物种：{symptom}"}
+            {"role": "user", "content": f"请鉴定这个人的灵魂物种：{symptom}\n\n请严格按照 JSON 格式输出，不要添加任何其他文字。"}
         ],
-        response_format={"type": "json_object"},
         temperature=0.9,
     )
     
-    result = json.loads(response.choices[0].message.content)
+    logger.info("LLM 调用成功，开始解析响应")
+    content = response.choices[0].message.content
+    logger.info(f"LLM 原始响应: {content[:200]}...")  # 只打印前200字符
+    
+    # 尝试解析 JSON（可能需要清理响应）
+    try:
+        # 移除可能的 markdown 代码块标记
+        if content.startswith("```json"):
+            content = content.replace("```json", "").replace("```", "").strip()
+        elif content.startswith("```"):
+            content = content.replace("```", "").strip()
+        
+        result = json.loads(content)
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON 解析失败: {e}")
+        logger.error(f"原始内容: {content}")
+        raise ValueError(f"LLM 返回的内容不是有效的 JSON: {e}")
     
     # 检查是否命中了预置物种
     object_name = result.get("object_name")
