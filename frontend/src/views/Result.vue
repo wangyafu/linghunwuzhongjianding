@@ -367,7 +367,7 @@ const diagnoseAgain = () => {
     radial-gradient(#f0f0f0 10%, transparent 10%); /* 极其细微的噪点/纹理 */
   background-size: 100% 100%, 3px 3px;
   
-  padding: 24px 20px 32px;
+  padding: 16px 20px 5px;
   box-shadow: 
     0 4px 6px -1px rgba(0, 0, 0, 0.1), 
     0 2px 4px -1px rgba(0, 0, 0, 0.06),
@@ -382,7 +382,7 @@ const diagnoseAgain = () => {
 
 /* 1. 图片区 */
 .card-header {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   display: flex;
   justify-content: center;
 }
@@ -418,14 +418,14 @@ const diagnoseAgain = () => {
 /* 2. 标题区 */
 .species-identity {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   border-bottom: 1px solid rgba(0,0,0,0.1);
-  padding-bottom: 16px;
+  padding-bottom: 10px;
 }
 
 .species-name {
   font-family: "Songti SC", "SimSun", "STSong", serif; /* 宋体 */
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: #1a1a1a;
   margin: 0 0 8px 0;
@@ -442,14 +442,14 @@ const diagnoseAgain = () => {
 
 /* 3. 正文区 */
 .diagnosis-content {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   padding: 0 8px;
 }
 
 .diagnosis-text {
   font-family: 'Courier New', Courier, monospace; /* 打字机字体 */
-  font-size: 0.95rem;
-  line-height: 1.8;
+  font-size: 0.8rem;
+  line-height: 1.6;
   color: #333;
   text-align: justify;
   white-space: pre-wrap;
@@ -460,7 +460,7 @@ const diagnoseAgain = () => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   padding: 0 8px;
   justify-content: flex-start;
 }
@@ -622,13 +622,13 @@ const diagnoseAgain = () => {
 .export-card {
   width: 320px;
   background: #fffdf5;
-  padding: 24px 20px 32px;
+  padding: 16px 20px 5px;
   border-radius: 2px;
   font-family: 'Courier New', Courier, monospace;
 }
 
 .export-card-header {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   display: flex;
   justify-content: center;
 }
@@ -664,14 +664,14 @@ const diagnoseAgain = () => {
 
 .export-identity {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   border-bottom: 1px solid rgba(0,0,0,0.1);
-  padding-bottom: 16px;
+  padding-bottom: 10px;
 }
 
 .export-name {
   font-family: "Songti SC", "SimSun", "STSong", serif;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: #1a1a1a;
   margin: 0;
@@ -679,14 +679,14 @@ const diagnoseAgain = () => {
 }
 
 .export-diagnosis {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   padding: 0 8px;
 }
 
 .export-diagnosis-text {
   font-family: 'Courier New', Courier, monospace;
-  font-size: 0.95rem;
-  line-height: 1.8;
+  font-size: 0.8rem;
+  line-height: 1.6;
   color: #333;
   text-align: justify;
   white-space: pre-wrap;
@@ -697,7 +697,7 @@ const diagnoseAgain = () => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   padding: 0 8px;
   justify-content: flex-start;
 }
