@@ -184,6 +184,16 @@ async def diagnose_symptom_streaming(symptom: str) -> AsyncGenerator[dict, None]
                 # 到达结尾，清理
                 new_text = new_text.replace('"}', '').replace('```', '').replace('"', '')
             
+            # 额外清理仅包含 } 或 ] 的残留
+            if new_text.strip() in ['}', ']', '"}', '"]']:
+                new_text = ""
+            
+            # 清理末尾可能的残留
+            if new_text.endswith('"}'):
+                 new_text = new_text[:-2]
+            elif new_text.endswith('}'):
+                 new_text = new_text[:-1]
+
             if new_text.strip():
                 yield {"type": "diagnosis_chunk", "chunk": new_text}
     

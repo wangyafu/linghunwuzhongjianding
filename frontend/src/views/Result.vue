@@ -1,6 +1,6 @@
 <template>
   <div class="result" v-if="diagnosis">
-    <!-- 鉴定卡片 (Archive Card Style) -->
+    <!-- 预览用鉴定卡片 (带视觉效果) -->
     <div class="species-card archive-card fade-in" ref="cardRef">
       
       <!-- 1. 物种图片区 (The Specimen) -->
@@ -46,12 +46,73 @@
 
         <!-- 5. 底部 (The Footer) -->
         <div class="card-footer">
-          <div class="stamp-box">
-            <span class="stamp-label">SAMPLE NO.</span>
-            <span class="stamp-number">{{ String(diagnosis.sequence_no).padStart(4, '0') }}</span>
+          <div class="footer-left">
+            <div class="stamp-box">
+              <span class="stamp-label">SAMPLE NO.</span>
+              <span class="stamp-number">{{ String(diagnosis.sequence_no).padStart(4, '0') }}</span>
+            </div>
+            <div class="site-tag">jingshenwuzhong.pages.dev</div>
           </div>
           <div class="date-stamp">
             {{ new Date().toLocaleDateString() }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 导出专用卡片（隐藏，无视觉效果）========== -->
+    <div class="export-card-wrapper" ref="exportCardRef">
+      <div class="export-card">
+        <!-- 1. 物种图片区 -->
+        <div class="export-card-header">
+          <div class="export-image-frame">
+            <img 
+              v-if="diagnosis.image_url" 
+              :src="ensureProtocol(diagnosis.image_url)" 
+              :alt="diagnosis.object_name"
+              class="export-image"
+              crossorigin="anonymous"
+            />
+            <div v-else class="export-image-placeholder">
+              {{ currentEmoji }}
+            </div>
+          </div>
+        </div>
+
+        <div class="export-card-body">
+          <!-- 2. 标题区 -->
+          <div class="export-identity">
+            <h1 class="export-name">{{ diagnosis.object_name }}</h1>
+          </div>
+
+          <!-- 3. 正文区 -->
+          <div class="export-diagnosis">
+            <p class="export-diagnosis-text">{{ diagnosis.diagnosis }}</p>
+          </div>
+
+          <!-- 4. 标签区 -->
+          <div class="export-keywords">
+            <span 
+              v-for="(keyword, index) in diagnosis.keywords" 
+              :key="'export-' + index"
+              class="export-tag"
+            >
+              #{{ keyword }}
+            </span>
+          </div>
+
+          <!-- 5. 底部 -->
+          <div class="export-footer">
+            <div class="export-footer-left">
+              <div class="export-stamp-box">
+                <span class="export-stamp-label">SAMPLE NO.</span>
+                <span class="export-stamp-number">{{ String(diagnosis.sequence_no).padStart(4, '0') }}</span>
+              </div>
+              <div class="export-site-tag">jingshenwuzhong.pages.dev</div>
+            </div>
+            <div class="export-date">
+              {{ new Date().toLocaleDateString() }}
+            </div>
           </div>
         </div>
       </div>
@@ -96,6 +157,7 @@ interface DiagnosisResult {
 const route = useRoute()
 const router = useRouter()
 const cardRef = ref<HTMLElement | null>(null)
+const exportCardRef = ref<HTMLElement | null>(null)  // 导出专用卡片引用
 const diagnosis = ref<DiagnosisResult | null>(null)
 const currentEmoji = ref('❓')
 const isComplete = ref(false) // 标记是否已完成接收
@@ -221,29 +283,17 @@ const handleImageError = (e: Event) => {
 }
 
 const saveCard = async () => {
-  if (!cardRef.value || !diagnosis.value) return
+  if (!exportCardRef.value || !diagnosis.value) return
   
-  // 获取需要临时修改样式的元素
-  const card = cardRef.value
-  const image = card.querySelector('.real-image') as HTMLImageElement | null
-  
-  // 保存原始样式
-  const originalCardFilter = card.style.filter
-  const originalImageFilter = image?.style.filter || ''
-  const originalImageBlendMode = image?.style.mixBlendMode || ''
+  // 使用导出专用卡片（隐藏的干净版本）
+  const exportCard = exportCardRef.value.querySelector('.export-card') as HTMLElement
+  if (!exportCard) return
   
   try {
-    // 临时移除 html2canvas 不兼容的 CSS 效果
-    card.style.filter = 'none'
-    if (image) {
-      image.style.filter = 'none'
-      image.style.mixBlendMode = 'normal'
-    }
-    
-    const canvas = await html2canvas(card, {
+    const canvas = await html2canvas(exportCard, {
       useCORS: true,
       scale: 2,
-      backgroundColor: '#f4f1ea', // 使用页面背景色，避免透明导致的渲染问题
+      backgroundColor: '#fffdf5',
     })
     
     const link = document.createElement('a')
@@ -253,13 +303,6 @@ const saveCard = async () => {
   } catch (err) {
     console.error('保存失败:', err)
     alert('保存失败，请手动截图留念')
-  } finally {
-    // 恢复原始样式
-    card.style.filter = originalCardFilter
-    if (image) {
-      image.style.filter = originalImageFilter
-      image.style.mixBlendMode = originalImageBlendMode
-    }
   }
 }
 
@@ -405,6 +448,13 @@ const diagnoseAgain = () => {
   border-top: 2px dashed #ddd;
 }
 
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
 .stamp-box {
   border: 2px solid #d32f2f; /* 红色印章框 */
   color: #d32f2f;
@@ -427,6 +477,16 @@ const diagnoseAgain = () => {
   font-size: 1.2rem;
   font-weight: 900;
   letter-spacing: 2px;
+}
+
+.site-tag {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.55rem;
+  color: #999;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
 }
 
 .date-stamp {
@@ -499,5 +559,160 @@ const diagnoseAgain = () => {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ========== 导出专用卡片样式 ========== */
+/* 这个卡片完全独立于预览卡片，使用干净的样式便于 html2canvas 渲染 */
+
+.export-card-wrapper {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  pointer-events: none;
+  /* 确保在屏幕外但仍然被渲染 */
+}
+
+.export-card {
+  width: 320px;
+  background: #fffdf5;
+  padding: 24px 20px 32px;
+  border-radius: 2px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.export-card-header {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.export-image-frame {
+  width: 240px;
+  height: 240px;
+  border: 2px solid #1a1a1a;
+  background: #fff;
+  padding: 8px;
+}
+
+.export-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 无滤镜，无混合模式 */
+}
+
+.export-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  background: #f0f0f0;
+}
+
+.export-card-body {
+  /* 内容区 */
+}
+
+.export-identity {
+  text-align: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 16px;
+}
+
+.export-name {
+  font-family: "Songti SC", "SimSun", "STSong", serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.export-diagnosis {
+  margin-bottom: 20px;
+  padding: 0 8px;
+}
+
+.export-diagnosis-text {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #333;
+  text-align: justify;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.export-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 0 8px;
+  justify-content: flex-start;
+}
+
+.export-tag {
+  font-family: sans-serif;
+  font-size: 0.85rem;
+  color: #8b0000;
+  font-weight: bold;
+}
+
+.export-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 16px;
+  border-top: 2px dashed #ddd;
+}
+
+.export-footer-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.export-stamp-box {
+  border: 2px solid #d32f2f;
+  color: #d32f2f;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.export-stamp-label {
+  font-size: 0.6rem;
+  font-weight: bold;
+}
+
+.export-stamp-number {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.export-site-tag {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.55rem;
+  color: #999;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+}
+
+.export-date {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.75rem;
+  color: #999;
 }
 </style>
