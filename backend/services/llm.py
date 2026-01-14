@@ -51,7 +51,7 @@ def load_system_prompt_template() -> str:
     except Exception as e:
         print(f"Warning: Failed to load system prompt template: {e}")
         # 返回一个基础的提示词作为后备
-        return """你是灵魂物种鉴定所的首席鉴定官。请将用户的情绪状态鉴定为一种离谱的物种。
+        return """你是精神物种鉴定所的首席鉴定官。请将用户的情绪状态鉴定为一种离谱的物种。
         
 现有馆藏物种：
 {species_list}
@@ -85,7 +85,7 @@ async def diagnose_symptom(symptom: str) -> dict:
         model=MODEL_NAME,
         messages=[
             {"role": "system", "content": get_system_prompt()},
-            {"role": "user", "content": f"请鉴定这个人的灵魂物种：{symptom}\n\n请严格按照 JSON 格式输出，不要添加任何其他文字。"}
+            {"role": "user", "content": f"请鉴定这个人的精神物种：{symptom}\n\n请严格按照 JSON 格式输出，不要添加任何其他文字。"}
         ],
         temperature=1.0,
     )

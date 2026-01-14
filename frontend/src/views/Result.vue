@@ -144,11 +144,27 @@ const handleImageError = (e: Event) => {
 const saveCard = async () => {
   if (!cardRef.value || !diagnosis.value) return
   
+  // 获取需要临时修改样式的元素
+  const card = cardRef.value
+  const image = card.querySelector('.real-image') as HTMLImageElement | null
+  
+  // 保存原始样式
+  const originalCardFilter = card.style.filter
+  const originalImageFilter = image?.style.filter || ''
+  const originalImageBlendMode = image?.style.mixBlendMode || ''
+  
   try {
-    const canvas = await html2canvas(cardRef.value, {
+    // 临时移除 html2canvas 不兼容的 CSS 效果
+    card.style.filter = 'none'
+    if (image) {
+      image.style.filter = 'none'
+      image.style.mixBlendMode = 'normal'
+    }
+    
+    const canvas = await html2canvas(card, {
       useCORS: true,
       scale: 2,
-      backgroundColor: null, // 透明背景，保留卡片的圆角和阴影
+      backgroundColor: '#f4f1ea', // 使用页面背景色，避免透明导致的渲染问题
     })
     
     const link = document.createElement('a')
@@ -158,6 +174,13 @@ const saveCard = async () => {
   } catch (err) {
     console.error('保存失败:', err)
     alert('保存失败，请手动截图留念')
+  } finally {
+    // 恢复原始样式
+    card.style.filter = originalCardFilter
+    if (image) {
+      image.style.filter = originalImageFilter
+      image.style.mixBlendMode = originalImageBlendMode
+    }
   }
 }
 

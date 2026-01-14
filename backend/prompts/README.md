@@ -5,7 +5,7 @@
 ## 文件说明
 
 ### system_prompt.md
-灵魂物种鉴定所的核心 System Prompt，定义了 AI 的角色、行为和输出格式。
+精神物种鉴定所的核心 System Prompt，定义了 AI 的角色、行为和输出格式。
 
 **模板变量：**
 - `{species_list}` - 会被替换为当前档案馆中已有的物种列表（用顿号分隔）

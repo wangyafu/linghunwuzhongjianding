@@ -1,12 +1,17 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List
 import os
 import logging
 import traceback
+import json
+import asyncio
+import time
 
 from services.llm import diagnose_symptom
+from services.llm_streaming import diagnose_symptom_streaming, get_preset_image_url
 from services.image_gen import generate_species_image_from_prompt
 from services.qiniu_storage import save_to_qiniu
 
@@ -18,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="灵魂物种鉴定所 API",
+    title="精神物种鉴定所 API",
     description="基于 AI 的情绪诊断工具",
     version="1.0.0"
 )
@@ -85,7 +90,7 @@ def get_next_sequence_no() -> int:
 
 @app.get("/")
 async def root():
-    return {"message": "欢迎来到灵魂物种鉴定所 🧬"}
+    return {"message": "欢迎来到精神物种鉴定所 🧬"}
 
 
 class PresetSpeciesItem(BaseModel):
@@ -108,6 +113,92 @@ async def get_preset_species():
     except Exception as e:
         print(f"Failed to load preset species: {e}")
         return []
+
+
+@app.get("/api/diagnose/stream")
+async def diagnose_stream(symptom: str):
+    """
+    流式诊断接口，使用 SSE 返回结果
+    
+    事件类型：
+    - species: 物种基础信息 (object_name, display_name, keywords, image_url)
+    - diagnosis_chunk: 诊断文案片段
+    - image: 生成的图片 URL（如果需要生成）
+    - done: 完成，包含 sequence_no
+    - error: 错误信息
+    """
+    logger.info(f"收到流式诊断请求: symptom='{symptom}'")
+    
+    if len(symptom) < 5 or len(symptom) > 50:
+        async def error_generator():
+            yield f"data: {json.dumps({'type': 'error', 'message': '症状描述需要在5-50字之间'})}\n\n"
+        return StreamingResponse(
+            error_generator(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "Connection": "keep-alive"}
+        )
+    
+    async def event_generator():
+        object_name = None
+        has_preset_image = False
+        
+        try:
+            # 流式调用 LLM
+            async for event in diagnose_symptom_streaming(symptom):
+                event_type = event.get("type")
+                
+                if event_type == "species":
+                    object_name = event.get("object_name")
+                    has_preset_image = bool(event.get("image_url"))
+                    yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+                    
+                elif event_type == "diagnosis_chunk":
+                    yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+                    
+                elif event_type == "error":
+                    yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+                    return
+            
+            # 如果没有预置图片，需要生成
+            if object_name and not has_preset_image:
+                try:
+                    logger.info(f"未命中预置图库，准备生成新图: object_name='{object_name}'")
+                    prompt = f"""极简涂鸦风格。画风潦草，甚至有点丑。{object_name}，
+粗线条手绘，简约卡通表情，背景颜色必须是纯白的。
+适合社交媒体分享的正方形构图"""
+                    
+                    temp_url = await generate_species_image_from_prompt(prompt)
+                    logger.info(f"图片生成成功，临时 URL: {temp_url}")
+                    
+                    # 上传到七牛云
+                    timestamp = int(time.time())
+                    object_name_safe = object_name.replace(" ", "_")
+                    key = f"species/{object_name_safe}_{timestamp}.png"
+                    
+                    image_url = await save_to_qiniu(temp_url, key)
+                    logger.info(f"七牛云上传成功: {image_url}")
+                    
+                    yield f"data: {json.dumps({'type': 'image', 'url': image_url}, ensure_ascii=False)}\n\n"
+                    
+                except Exception as img_error:
+                    logger.error(f"图片生成/上传失败: {img_error}")
+                    # 发送占位图
+                    yield f"data: {json.dumps({'type': 'image', 'url': 'https://placeholder.com/species/unknown.png'}, ensure_ascii=False)}\n\n"
+            
+            # 获取序号并发送完成事件
+            sequence_no = get_next_sequence_no()
+            yield f"data: {json.dumps({'type': 'done', 'sequence_no': sequence_no}, ensure_ascii=False)}\n\n"
+            
+        except Exception as e:
+            logger.error(f"流式诊断失败: {type(e).__name__}: {str(e)}")
+            logger.error(f"完整错误堆栈:\n{traceback.format_exc()}")
+            yield f"data: {json.dumps({'type': 'error', 'message': f'诊断失败: {str(e)}'}, ensure_ascii=False)}\n\n"
+    
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive"}
+    )
 
 
 @app.post("/api/diagnose", response_model=DiagnoseResponse)
@@ -175,7 +266,7 @@ async def diagnose(request: DiagnoseRequest):
             object_name=object_name,
             display_name=display_name,
             keywords=result.get("keywords", ["神秘", "未知", "待鉴定"]),
-            diagnosis=result.get("diagnosis", "你的灵魂物种正在鉴定中..."),
+            diagnosis=result.get("diagnosis", "你的精神物种正在鉴定中..."),
             image_url=image_url,
             sequence_no=sequence_no
         )
