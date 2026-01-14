@@ -28,14 +28,14 @@
           v-model="symptom"
           class="input symptom-input"
           placeholder="描述你现在的状态或情绪..."
-          maxlength="50"
+          maxlength="140"
           @keydown.enter.prevent="handleDiagnose"
         ></textarea>
         <button class="dice-btn" @click="randomSymptom" title="随机填入">
           🎲
         </button>
       </div>
-      <p class="char-count">{{ symptom.length }}/50</p>
+      <p class="char-count">{{ symptom.length }}/140</p>
     </div>
 
     <!-- 盖章按钮 -->
@@ -348,7 +348,7 @@ const toggleDonateModal = () => {
   justify-content: center;
   background: #fff;
   border: 2px solid #1a1a1a;
-  border-radius: 50%;
+  border-radius: 140%;
 }
 
 .specimen {
@@ -385,7 +385,7 @@ const toggleDonateModal = () => {
   width: 100%;
   min-height: 80px;
   padding: 12px;
-  padding-right: 50px;
+  padding-right: 140px;
   resize: none;
   border: 1px solid #1a1a1a;
   background: #fff;
@@ -477,7 +477,7 @@ const toggleDonateModal = () => {
   height: 20px;
   border: 3px solid rgba(255,255,255,0.3);
   border-top-color: #fff;
-  border-radius: 50%;
+  border-radius: 140%;
   animation: spin 1s linear infinite;
 }
 
