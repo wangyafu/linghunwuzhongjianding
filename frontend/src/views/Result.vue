@@ -188,6 +188,29 @@ const ensureProtocol = (url: string) => {
   return fullUrl
 }
 
+// 缓存相关函数
+const getCacheKey = (symptom: string) => `diagnosis_cache_${symptom}`
+
+const getCachedDiagnosis = (symptom: string): DiagnosisResult | null => {
+  try {
+    const cached = sessionStorage.getItem(getCacheKey(symptom))
+    if (cached) {
+      return JSON.parse(cached)
+    }
+  } catch (e) {
+    console.error('读取缓存失败:', e)
+  }
+  return null
+}
+
+const saveDiagnosisToCache = (symptom: string, data: DiagnosisResult) => {
+  try {
+    sessionStorage.setItem(getCacheKey(symptom), JSON.stringify(data))
+  } catch (e) {
+    console.error('保存缓存失败:', e)
+  }
+}
+
 onMounted(() => {
   const symptomParam = route.query.symptom as string
   const speciesDataParam = route.query.speciesData as string
@@ -198,8 +221,17 @@ onMounted(() => {
     return
   }
 
+  // 1. 先检查缓存
+  const cached = getCachedDiagnosis(symptomParam)
+  if (cached && cached.diagnosis && cached.sequence_no > 0) {
+    // 有完整的缓存数据，直接使用
+    diagnosis.value = cached
+    isComplete.value = true
+    return
+  }
+
   try {
-    // 解析species数据
+    // 2. 无缓存，解析species数据并发起SSE请求
     const speciesData = JSON.parse(decodeURIComponent(speciesDataParam))
     
     // 立即显示物种卡片框架
@@ -212,7 +244,7 @@ onMounted(() => {
       sequence_no: 0 // 初始序号为0
     }
     
-    // 重新建立SSE连接，接收后续数据
+    // 建立SSE连接，接收后续数据
     const url = `${API_ENDPOINTS.diagnoseStream}?symptom=${encodeURIComponent(symptomParam)}`
     eventSource = new EventSource(url)
     
@@ -243,6 +275,8 @@ onMounted(() => {
           // 接收完成，更新序号
           if (diagnosis.value) {
             diagnosis.value.sequence_no = data.sequence_no
+            // 保存到缓存
+            saveDiagnosisToCache(symptomParam, diagnosis.value)
           }
           isComplete.value = true
           eventSource?.close()
