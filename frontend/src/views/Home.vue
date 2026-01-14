@@ -192,31 +192,48 @@ const handleDiagnose = async () => {
   isLoading.value = true
   
   try {
-    const response = await fetch(API_ENDPOINTS.diagnose, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ symptom: symptom.value })
-    })
+    // 构建SSE URL
+    const url = `${API_ENDPOINTS.diagnoseStream}?symptom=${encodeURIComponent(symptom.value)}`
+    const eventSource = new EventSource(url)
     
-    if (!response.ok) {
-      throw new Error('诊断失败')
-    }
-    
-    const result = await response.json()
-    
-    // 跳转到结果页，传递诊断结果
-    router.push({
-      name: 'result',
-      query: {
-        data: encodeURIComponent(JSON.stringify(result))
+    // 监听消息事件
+    eventSource.addEventListener('message', (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        
+        if (data.type === 'species') {
+          // 收到物种信息，关闭连接并跳转到Result页面
+          eventSource.close()
+          isLoading.value = false
+          
+          router.push({
+            name: 'result',
+            query: {
+              symptom: symptom.value,
+              speciesData: encodeURIComponent(JSON.stringify(data))
+            }
+          })
+        } else if (data.type === 'error') {
+          // 收到错误
+          eventSource.close()
+          isLoading.value = false
+          alert(data.message || '诊断过程出了点问题，请稍后再试~')
+        }
+      } catch (e) {
+        console.error('解析SSE数据失败:', e)
       }
     })
+    
+    // 监听错误事件
+    eventSource.addEventListener('error', () => {
+      eventSource.close()
+      isLoading.value = false
+      alert('连接失败，请检查网络后重试~')
+    })
+    
   } catch (error) {
     console.error('诊断出错:', error)
     alert('诊断过程出了点问题，请稍后再试~')
-  } finally {
     isLoading.value = false
   }
 }

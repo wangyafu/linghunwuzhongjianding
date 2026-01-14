@@ -79,9 +79,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import html2canvas from 'html2canvas'
+import { API_ENDPOINTS, type SSEEvent } from '@/config/api'
 
 interface DiagnosisResult {
   object_name: string
@@ -97,6 +98,9 @@ const router = useRouter()
 const cardRef = ref<HTMLElement | null>(null)
 const diagnosis = ref<DiagnosisResult | null>(null)
 const currentEmoji = ref('❓')
+const isComplete = ref(false) // 标记是否已完成接收
+
+let eventSource: EventSource | null = null
 
 // 辅助函数：处理图片 URL
 const ensureProtocol = (url: string) => {
@@ -123,16 +127,91 @@ const ensureProtocol = (url: string) => {
 }
 
 onMounted(() => {
-  const dataParam = route.query.data as string
-  if (dataParam) {
-    try {
-      diagnosis.value = JSON.parse(decodeURIComponent(dataParam))
-    } catch (e) {
-      console.error('解析诊断结果失败:', e)
-      router.push('/')
-    }
-  } else {
+  const symptomParam = route.query.symptom as string
+  const speciesDataParam = route.query.speciesData as string
+  
+  if (!symptomParam || !speciesDataParam) {
+    // 缺少必要参数，返回首页
     router.push('/')
+    return
+  }
+
+  try {
+    // 解析species数据
+    const speciesData = JSON.parse(decodeURIComponent(speciesDataParam))
+    
+    // 立即显示物种卡片框架
+    diagnosis.value = {
+      object_name: speciesData.object_name || '',
+      display_name: speciesData.display_name || speciesData.object_name || '',
+      keywords: speciesData.keywords || [],
+      diagnosis: '', // 诊断文案初始为空，等待流式接收
+      image_url: speciesData.image_url || '', // 可能有预置图片
+      sequence_no: 0 // 初始序号为0
+    }
+    
+    // 重新建立SSE连接，接收后续数据
+    const url = `${API_ENDPOINTS.diagnoseStream}?symptom=${encodeURIComponent(symptomParam)}`
+    eventSource = new EventSource(url)
+    
+    eventSource.addEventListener('message', (event) => {
+      try {
+        const data: SSEEvent = JSON.parse(event.data)
+        
+        if (data.type === 'species') {
+          // 忽略重复的species事件（因为我们已经有了初始数据）
+          // 但如果有更新的信息也可以覆盖
+          if (diagnosis.value) {
+            // 更新可能缺失的字段
+            if (data.image_url && !diagnosis.value.image_url) {
+              diagnosis.value.image_url = data.image_url
+            }
+          }
+        } else if (data.type === 'diagnosis_chunk') {
+          // 追加诊断文案片段（打字机效果）
+          if (diagnosis.value) {
+            diagnosis.value.diagnosis += data.chunk
+          }
+        } else if (data.type === 'image') {
+          // 更新图片URL
+          if (diagnosis.value) {
+            diagnosis.value.image_url = data.url
+          }
+        } else if (data.type === 'done') {
+          // 接收完成，更新序号
+          if (diagnosis.value) {
+            diagnosis.value.sequence_no = data.sequence_no
+          }
+          isComplete.value = true
+          eventSource?.close()
+        } else if (data.type === 'error') {
+          // 错误处理
+          console.error('SSE错误:', data.message)
+          alert(data.message || '诊断过程出了点问题')
+          eventSource?.close()
+        }
+      } catch (e) {
+        console.error('解析SSE数据失败:', e)
+      }
+    })
+    
+    eventSource.addEventListener('error', () => {
+      console.error('SSE连接错误')
+      eventSource?.close()
+      // 即使连接出错，也允许用户查看已接收到的部分数据
+      isComplete.value = true
+    })
+    
+  } catch (e) {
+    console.error('解析初始数据失败:', e)
+    router.push('/')
+  }
+})
+
+onUnmounted(() => {
+  // 组件销毁时关闭SSE连接
+  if (eventSource) {
+    eventSource.close()
   }
 })
 

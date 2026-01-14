@@ -165,7 +165,7 @@ async def diagnose_symptom_streaming(symptom: str) -> AsyncGenerator[dict, None]
                                 if diagnosis_buffer.endswith('"}'):
                                     diagnosis_buffer = diagnosis_buffer[:-2]
                                 if diagnosis_buffer:
-                                    yield {"type": "diagnosis_chunk", "text": diagnosis_buffer}
+                                    yield {"type": "diagnosis_chunk", "chunk": diagnosis_buffer}
                         
                     except json.JSONDecodeError:
                         # 还不够完整，继续累积
@@ -185,7 +185,7 @@ async def diagnose_symptom_streaming(symptom: str) -> AsyncGenerator[dict, None]
                 new_text = new_text.replace('"}', '').replace('```', '').replace('"', '')
             
             if new_text.strip():
-                yield {"type": "diagnosis_chunk", "text": new_text}
+                yield {"type": "diagnosis_chunk", "chunk": new_text}
     
     # 如果没有成功流式解析，尝试解析完整响应
     if not species_info_sent:
@@ -212,7 +212,7 @@ async def diagnose_symptom_streaming(symptom: str) -> AsyncGenerator[dict, None]
             
             # 一次性发送完整诊断
             diagnosis = result.get("diagnosis", "你的精神物种正在鉴定中...")
-            yield {"type": "diagnosis_chunk", "text": diagnosis}
+            yield {"type": "diagnosis_chunk", "chunk": diagnosis}
             
         except json.JSONDecodeError as e:
             logger.error(f"完整响应解析失败: {e}")
