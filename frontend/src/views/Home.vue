@@ -385,7 +385,7 @@ const toggleDonateModal = () => {
   width: 100%;
   min-height: 80px;
   padding: 12px;
-  padding-right: 140px;
+  padding-right: 50px;
   resize: none;
   border: 1px solid #1a1a1a;
   background: #fff;
@@ -413,8 +413,7 @@ const toggleDonateModal = () => {
   height: 32px;
   font-size: 1.2rem;
   background: transparent;
-  border: 1px solid #999;
-  border-radius: 2px;
+  border: none;
   cursor: pointer;
   transition: all 0.15s ease;
   color: #666;
