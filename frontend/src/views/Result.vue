@@ -121,10 +121,10 @@
     <!-- 操作按钮 -->
     <div class="actions">
       <button class="btn btn-primary" @click="saveCard">
-        💾 收藏档案
+        收 藏 档 案
       </button>
       <button class="btn btn-secondary" @click="diagnoseAgain">
-        🔄 重启诊断
+        重 新 鉴 定
       </button>
     </div>
 
@@ -455,22 +455,25 @@ const diagnoseAgain = () => {
   white-space: pre-wrap;
 }
 
-/* 4. 标签区 */
+/* 4. 标签区 - 胶囊药丸风格 */
 .keywords {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 28px;
   padding: 0 8px;
   justify-content: flex-start;
 }
 
 .archive-tag {
-  font-family: sans-serif;
-  font-size: 0.85rem;
-  color: #8b0000; /* 深红印泥色 */
-  font-weight: bold;
-  opacity: 0.8;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.75rem;
+  color: #8b0000;
+  font-weight: normal;
+  padding: 3px 8px;
+  border: 0.5px solid #8b0000;
+  border-radius: 10px;
+  background: transparent;
 }
 
 /* 5. 底部 */
@@ -530,42 +533,52 @@ const diagnoseAgain = () => {
   transform: rotate(1deg);
 }
 
-/* 按钮样式 */
+/* 按钮样式 - 医疗仪器控制面板风格 */
 .actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
   max-width: 320px;
 }
 
 .btn {
   flex: 1;
-  padding: 12px;
-  border: 2px solid #1a1a1a;
+  padding: 14px 12px;
+  border: 1px solid #000;
   background: transparent;
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: bold;
+  font-family: "Songti SC", "SimSun", "STSong", serif;
+  font-weight: 400;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
   cursor: pointer;
   transition: all 0.2s;
-  border-radius: 8px;
+  border-radius: 2px;
 }
 
 .btn-primary {
-  background: #1a1a1a;
+  background: #000;
   color: #fff;
 }
 
+.btn-primary:hover {
+  background: #333;
+}
+
 .btn-primary:active {
-  transform: translateY(2px);
+  transform: translate(1px, 1px);
 }
 
 .btn-secondary {
-  background: #fff;
-  color: #1a1a1a;
+  background: transparent;
+  color: #000;
+}
+
+.btn-secondary:hover {
+  background: #f5f5f5;
 }
 
 .btn-secondary:active {
-  background: #f0f0f0;
+  background: #eee;
 }
 
 .share-hint {
@@ -683,17 +696,21 @@ const diagnoseAgain = () => {
 .export-keywords {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 28px;
   padding: 0 8px;
   justify-content: flex-start;
 }
 
 .export-tag {
-  font-family: sans-serif;
-  font-size: 0.85rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.75rem;
   color: #8b0000;
-  font-weight: bold;
+  font-weight: normal;
+  padding: 3px 8px;
+  border: 0.5px solid #8b0000;
+  border-radius: 10px;
+  background: transparent;
 }
 
 .export-footer {

@@ -39,17 +39,18 @@
     </div>
 
     <!-- 盖章按钮 -->
-    <button class="btn stamp-btn btn-pink" @click="handleDiagnose" :disabled="isLoading">
-      <span v-if="!isLoading">🔬 开始鉴定</span>
+    <button class="btn-start" @click="handleDiagnose" :disabled="isLoading">
+      <span v-if="!isLoading">开 始 临 床 鉴 定</span>
       <span v-else class="loading"></span>
     </button>
 
     <!-- 底部信息区 -->
     <div class="footer-info">
-      <p class="disclaimer">仅供娱乐，如有雷同纯属巧合 ✨</p>
+      <p class="disclaimer">仅供娱乐，如有雷同纯属巧合</p>
       <div class="footer-links">
-        <button class="footer-link" @click="openContact">📮 联系作者</button>
-        <button class="footer-link" @click="toggleDonateModal">🥤 请我喝奶茶</button>
+        <button class="footer-link" @click="openContact">联系所长</button>
+        <span class="footer-divider">|</span>
+        <button class="footer-link" @click="toggleDonateModal">捐赠猫粮</button>
       </div>
     </div>
 
@@ -252,6 +253,7 @@ const toggleDonateModal = () => {
 </script>
 
 <style scoped>
+/* 全局容器 - 与结果页保持一致的复古档案馆风格 */
 .home {
   min-height: 100vh;
   padding: 40px 20px;
@@ -259,25 +261,26 @@ const toggleDonateModal = () => {
   flex-direction: column;
   align-items: center;
   gap: 24px;
+  background-color: #f4f1ea; /* 与结果页相同的米黄色背景 */
+  font-family: 'Courier New', Courier, monospace; /* 打字机字体 */
 }
 
 .header {
   text-align: center;
 }
 
-/* 物种展示区 */
+/* 物种展示区 - 类似博物馆标本框的设计 */
 .species-showcase {
   width: 100%;
   max-width: 280px;
   padding: 24px;
   text-align: center;
-
 }
 
 .species-image-container {
   width: 180px;
   height: 180px;
-  margin: 0 auto 16px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -289,7 +292,8 @@ const toggleDonateModal = () => {
   object-fit: cover;
   opacity: 0;
   transition: opacity 0.3s ease;
-  mix-blend-mode: multiply;  /* 让白色背景融入页面背景 */
+  filter: sepia(0.2) contrast(1.1); /* 复古滤镜 */
+  mix-blend-mode: multiply;
 }
 
 .species-image.fade-in {
@@ -297,10 +301,11 @@ const toggleDonateModal = () => {
 }
 
 .species-name {
-  font-family: var(--font-title);
+  font-family: "Songti SC", "SimSun", "STSong", serif; /* 宋体 */
   font-size: 1.2rem;
-  color: var(--text-dark);
+  color: #1a1a1a;
   margin-bottom: 8px;
+  font-weight: 900;
 }
 
 .species-hint {
@@ -309,16 +314,20 @@ const toggleDonateModal = () => {
 }
 
 .title {
-  font-family: var(--font-title);
+  font-family: "Songti SC", "SimSun", "STSong", serif; /* 宋体 */
   font-size: 2rem;
-  color: var(--text-dark);
+  color: #1a1a1a;
   margin-bottom: 4px;
+  font-weight: 900;
+  letter-spacing: 2px;
 }
 
 .subtitle {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #666;
   font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
 .specimen-frame {
@@ -326,7 +335,8 @@ const toggleDonateModal = () => {
   max-width: 280px;
   padding: 24px;
   text-align: center;
-  background: var(--text-light);
+  background: #fffdf5;
+  border: 2px solid #1a1a1a;
 }
 
 .specimen-container {
@@ -336,8 +346,8 @@ const toggleDonateModal = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-primary);
-  border: var(--border-thick);
+  background: #fff;
+  border: 2px solid #1a1a1a;
   border-radius: 50%;
 }
 
@@ -351,6 +361,7 @@ const toggleDonateModal = () => {
   color: #888;
 }
 
+/* 输入区 - 档案馆表单风格 */
 .input-section {
   width: 100%;
   max-width: 360px;
@@ -358,9 +369,12 @@ const toggleDonateModal = () => {
 
 .input-label {
   display: block;
-  font-family: var(--font-title);
+  font-family: "Songti SC", "SimSun", "STSong", serif;
   font-size: 1.1rem;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  color: #1a1a1a;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .input-wrapper {
@@ -368,56 +382,114 @@ const toggleDonateModal = () => {
 }
 
 .symptom-input {
+  width: 100%;
   min-height: 80px;
+  padding: 12px;
   padding-right: 50px;
   resize: none;
+  border: 1px solid #1a1a1a;
+  background: #fff;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.symptom-input:focus {
+  outline: none;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+}
+
+.symptom-input::placeholder {
+  color: #999;
 }
 
 .dice-btn {
   position: absolute;
-  right: 12px;
-  top: 12px;
-  width: 36px;
-  height: 36px;
-  font-size: 1.5rem;
-  background: var(--accent-yellow);
-  border: 3px solid var(--text-dark);
-  border-radius: 8px;
+  right: 8px;
+  top: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  background: transparent;
+  border: 1px solid #999;
+  border-radius: 2px;
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: all 0.15s ease;
+  color: #666;
 }
 
 .dice-btn:hover {
-  transform: scale(1.1) rotate(15deg);
+  border-color: #1a1a1a;
+  color: #1a1a1a;
 }
 
 .dice-btn:active {
-  transform: scale(0.95);
+  background: #f0f0f0;
 }
 
 .char-count {
   text-align: right;
-  font-size: 0.8rem;
-  color: #888;
-  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 8px;
+  font-family: 'Courier New', Courier, monospace;
 }
 
-.stamp-btn {
+/* 主按钮 - “核武器发射键”风格 */
+.btn-start {
   width: 100%;
   max-width: 360px;
-  padding: 16px 32px;
-  font-size: 1.3rem;
+  padding: 18px 32px;
+  font-size: 1rem;
+  font-family: "Songti SC", "SimSun", "STSong", serif;
+  font-weight: 400;
+  letter-spacing: 4px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.stamp-btn:disabled {
-  opacity: 0.7;
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-start:active {
+  transform: translate(1px, 1px);
+}
+
+.btn-start:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
+  background: #000;
+  color: #fff;
+}
+
+/* 加载动画 */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .disclaimer {
   font-size: 0.75rem;
   color: #999;
   text-align: center;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 /* 底部功能区 */
@@ -434,29 +506,32 @@ const toggleDonateModal = () => {
 .footer-links {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 
 .footer-link {
-  padding: 8px 16px;
-  font-size: 0.85rem;
+  padding: 0;
+  font-size: 0.75rem;
+  font-family: 'Courier New', Courier, monospace;
   background: transparent;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  color: #666;
+  border: none;
+  color: #888;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .footer-link:hover {
-  border-color: var(--accent-purple);
-  color: var(--accent-purple);
-  background: white;
-  transform: translateY(-2px);
+  color: #1a1a1a;
+  text-decoration: underline;
 }
 
-/* 弹窗样式 */
+.footer-divider {
+  color: #ccc;
+  font-size: 0.75rem;
+}
+
+/* 弹窗样式 - 档案馆风格 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -473,14 +548,15 @@ const toggleDonateModal = () => {
 }
 
 .donate-modal {
-  background: white;
-  border-radius: 20px;
+  background: #fffdf5;
+  border: 2px solid #1a1a1a;
+  border-radius: 4px;
   padding: 32px;
   max-width: 400px;
   width: 100%;
   position: relative;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.15);
   animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -491,16 +567,16 @@ const toggleDonateModal = () => {
 
 .modal-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: #f5f5f5;
-  border-radius: 50%;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #1a1a1a;
+  background: #fffdf5;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  color: #999;
+  color: #1a1a1a;
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -508,21 +584,23 @@ const toggleDonateModal = () => {
 }
 
 .modal-close:hover {
-  background: #eee;
-  color: #666;
+  background: #f0f0f0;
+  transform: translateY(-1px);
 }
 
 .modal-title {
-  font-family: var(--font-title);
-  font-size: 1.5rem;
-  color: var(--text-dark);
+  font-family: "Songti SC", "SimSun", "STSong", serif;
+  font-size: 1.4rem;
+  color: #1a1a1a;
   margin-bottom: 8px;
+  font-weight: 900;
 }
 
 .modal-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #666;
   margin-bottom: 24px;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 .qr-codes {
@@ -542,13 +620,14 @@ const toggleDonateModal = () => {
   width: 140px;
   height: 140px;
   object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid #eee;
+  border: 2px solid #1a1a1a;
+  border-radius: 4px;
 }
 
 .qr-label {
-  font-size: 0.8rem;
-  color: #888;
+  font-size: 0.75rem;
+  color: #666;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 /* 响应式调整 */
@@ -556,6 +635,20 @@ const toggleDonateModal = () => {
   .qr-image {
     width: 120px;
     height: 120px;
+  }
+  
+  .title {
+    font-size: 1.6rem;
+  }
+  
+  .species-showcase {
+    max-width: 260px;
+    padding: 16px;
+  }
+  
+  .species-image-container {
+    width: 160px;
+    height: 160px;
   }
 }
 </style>
