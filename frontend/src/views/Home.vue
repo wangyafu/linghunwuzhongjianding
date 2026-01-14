@@ -2,7 +2,7 @@
   <div class="home">
     <!-- 标题区 -->
     <header class="header">
-      <h1 class="title">灵魂物种鉴定中心</h1>
+      <h1 class="title">精神物种鉴定中心</h1>
       <p class="subtitle">Institute of Spiritual Speciation</p>
     </header>
 
